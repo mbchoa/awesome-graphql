@@ -1,0 +1,38 @@
+name: Maintenance
+
+on:
+  schedule:
+    - cron: "0 9 1 */3 *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  list-curation-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Create list curation review issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: Quarterly list curation review
+        run: |
+          existing="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --label maintenance \
+            --search "\"$ISSUE_TITLE\" in:title" \
+            --json number \
+            --jq length)"
+
+          if [[ "$existing" -eq 0 ]]; then
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$ISSUE_TITLE" \
+              --label maintenance \
+              --body $'Review the list for resources that no longer meet its quality bar.\n\n- [ ] Review failed and ignored links.\n- [ ] Remove archived, abandoned, deprecated, or undocumented resources.\n- [ ] Verify descriptions remain accurate and objective.\n- [ ] Check that entries remain in the most relevant categories.\n- [ ] Run `pnpm lint`.\n- [ ] Run the Links workflow manually after updating.'
+          fi

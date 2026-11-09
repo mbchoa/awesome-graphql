@@ -1,0 +1,33 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":disableRateLimiting",
+    ":enableVulnerabilityAlerts",
+    ":semanticCommitTypeAll(chore)",
+    "helpers:pinGitHubActionDigests",
+    ":rebaseStalePrs",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "labels": ["dependency"],
+  "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "description": "Do not pin the Renovate action's version input by digest",
+      "matchFileNames": [".github/workflows/renovate.yml"],
+      "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
+      "matchUpdateTypes": ["pinDigest"],
+      "enabled": false
+    },
+    {
+      "description": "Explain why workflow updates cannot be created automatically",
+      "matchFileNames": [".github/workflows/**"],
+      "dependencyDashboardCategory": ":warning: Workflow updates require a token with `workflows` permission"
+    },
+    {
+      "description": "Remove word `dependency` from commit messages and PR titles",
+      "matchDatasources": ["npm"],
+      "commitMessageTopic": "{{depName}}"
+    }
+  ]
+}
